@@ -151,7 +151,7 @@ async def test_error_synthesis(model, tmpdir, results: TestResults):
             True,
             f"Generated {guideline_type} guideline: {guideline[:60]}..."
         )
-        return guideline, scope
+        return guideline, guideline_type
     else:
         results.add("Error generates guideline", False, "No guideline generated")
         return None, None
