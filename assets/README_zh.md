@@ -56,7 +56,7 @@ pip install scope-optimizer
 
 ```bash
 git clone https://github.com/JarvisPei/SCOPE.git
-cd scope
+cd SCOPE
 pip install -e .
 ```
 
