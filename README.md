@@ -27,6 +27,10 @@
   <a href="CONTRIBUTING.md"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome"></a>
 </p>
 
+<p align="center">
+  <strong>English</strong> | <a href="assets/README_zh.md">中文</a>
+</p>
+
 ---
 
 ## Overview
