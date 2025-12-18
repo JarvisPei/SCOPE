@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "scope-optimizer"
+version = "0.1.1"
+description = "SCOPE: Self-evolving Context Optimization via Prompt Evolution - A framework for automatic prompt optimization"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+authors = [
+    {name = "SCOPE Team"}
+]
+keywords = [
+    "llm",
+    "prompt-optimization",
+    "agents",
+    "machine-learning",
+    "nlp",
+    "prompt-engineering",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+# All model providers included by default for simplicity
+dependencies = [
+    "openai>=1.0.0",
+    "anthropic>=0.18.0",
+    "litellm>=1.0.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+# Development dependencies only
+dev = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/JarvisPei/SCOPE"
+Documentation = "https://github.com/JarvisPei/SCOPE#readme"
+Repository = "https://github.com/JarvisPei/SCOPE"
+Issues = "https://github.com/JarvisPei/SCOPE/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["scope*"]
+
+[tool.setuptools.package-data]
+scope = ["py.typed"]
+
+[tool.black]
+line-length = 100
+target-version = ["py38", "py39", "py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B"]
+ignore = ["E501", "E402", "W291", "W293", "E722", "B904"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
