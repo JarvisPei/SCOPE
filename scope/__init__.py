@@ -59,7 +59,7 @@ Logging:
 
 import logging
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Setup default logger with NullHandler (silent by default, following library best practices)
 logger = logging.getLogger("scope")

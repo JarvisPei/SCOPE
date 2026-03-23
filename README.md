@@ -33,6 +33,10 @@
 
 ---
 
+## News
+
+- **[2026/03]** [EvolveClaw](https://github.com/JarvisPei/EvolveClaw) — Evolve [OpenClaw](https://github.com/openclaw/openclaw)'s system prompt using SCOPE. Zero-modification plugin integration that makes the agent improve the more you use it.
+
 ## Overview
 
 **SCOPE** transforms static agent prompts into self-evolving systems that learn from their own execution. Instead of manually crafting prompts, SCOPE automatically synthesizes guidelines from execution traces and continuously improves agent performance.
