@@ -38,12 +38,17 @@ Key Components:
 - MemoryOptimizer: Optimizes accumulated rules
 
 Customization:
-    All LLM prompts are centralized in `scope.prompts` for easy customization:
+    All LLM prompts are centralized in `scope.prompts` for easy customization.
+    You can override any prompt via the ``custom_prompts`` parameter, and
+    override domain categories via ``custom_domains``:
     
     ```python
-    from scope import prompts
-    # View/modify prompts as needed
-    print(prompts.ERROR_REFLECTION_PROMPT)
+    optimizer = SCOPEOptimizer(
+        synthesizer_model=model,
+        exp_path="./data",
+        custom_prompts={"error_reflection": MY_PROMPT, ...},
+        custom_domains=["code_quality", "communication", "general"],
+    )
     ```
 
 Logging:
@@ -59,7 +64,7 @@ Logging:
 
 import logging
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 
 # Setup default logger with NullHandler (silent by default, following library best practices)
 logger = logging.getLogger("scope")

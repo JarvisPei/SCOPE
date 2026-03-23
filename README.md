@@ -35,6 +35,7 @@
 
 ## News
 
+- **[2026/03]** **v0.1.3** — Added `custom_prompts` and `custom_domains` API: override built-in prompt templates and domain categories to tailor SCOPE for any use case (e.g., personal assistant, coding agent) without modifying core code.
 - **[2026/03]** [EvolveClaw](https://github.com/JarvisPei/EvolveClaw) — Evolve [OpenClaw](https://github.com/openclaw/openclaw)'s system prompt using SCOPE. Zero-modification plugin integration that makes the agent improve the more you use it.
 
 ## Overview
@@ -165,8 +166,37 @@ optimizer = SCOPEOptimizer(
     optimizer_model=None,           # Separate model for rule optimization (default: synthesizer_model)
     enable_rule_optimization=True,  # Auto-optimize strategic memory when full (default: True)
     store_history=False,            # Store guideline generation history to disk (default: False)
+    
+    # Customization (v0.1.3+)
+    custom_prompts=None,            # Dict to override built-in prompt templates (default: None)
+    custom_domains=None,            # List of domain strings to override ALLOWED_DOMAINS (default: None)
 )
 ```
+
+#### Prompt & Domain Customization
+
+Override built-in prompts and domains to tailor SCOPE for your use case (e.g., personal assistant, coding agent):
+
+```python
+optimizer = SCOPEOptimizer(
+    synthesizer_model=model,
+    exp_path="./data",
+    custom_prompts={
+        "error_reflection": "...",                  # Error analysis prompt
+        "quality_reflection_efficiency": "...",     # Lightweight quality analysis
+        "quality_reflection_thoroughness": "...",   # Comprehensive quality analysis
+        "selector": "...",                          # Best-of-N candidate selector
+        "classification": "...",                    # Guideline classifier
+        "rule_analysis": "...",                     # Memory optimization: rule analysis
+        "rule_merge": "...",                        # Memory optimization: rule merging
+        "subsumption_verify": "...",                # Memory optimization: subsumption check
+        "conflict_resolve": "...",                  # Memory optimization: conflict resolution
+    },
+    custom_domains=["code_quality", "communication", "user_preferences", "general"],
+)
+```
+
+All keys are optional — unset keys fall back to the built-in defaults. Custom prompt templates must use the same `{placeholder}` format strings as the originals in `scope/prompts.py`.
 
 ### on_step_complete
 

@@ -84,6 +84,8 @@ class SCOPEOptimizer:
         optimizer_model = None,  # Separate model for rule optimization (defaults to synthesizer_model)
         enable_rule_optimization: bool = True,  # Enable/disable automatic rule optimization
         store_history: bool = False,  # Whether to store guideline history to disk
+        custom_prompts: Optional[Dict[str, str]] = None,  # Override built-in prompt templates
+        custom_domains: Optional[list] = None,  # Override ALLOWED_DOMAINS
     ):
         """
         Initialize the SCOPE optimizer.
@@ -109,6 +111,15 @@ class SCOPEOptimizer:
             optimizer_model: Separate model instance for rule optimization (defaults to synthesizer_model)
             enable_rule_optimization: Enable/disable automatic rule optimization when threshold reached
             store_history: Whether to store guideline generation history to disk (default: False)
+            custom_prompts: Optional dict to override built-in prompt templates.
+                Synthesizer keys: "error_reflection", "quality_reflection_efficiency",
+                "quality_reflection_thoroughness", "selector".
+                Classifier key: "classification".
+                Memory optimizer keys: "rule_analysis", "rule_merge",
+                "subsumption_verify", "conflict_resolve".
+                Unset keys fall back to built-in prompts.
+            custom_domains: Optional list of domain strings to override ALLOWED_DOMAINS.
+                Used for guideline classification and strategic memory organization.
         """
         # Validate parameters
         valid_thresholds = {"all", "low", "medium", "high"}
@@ -131,8 +142,12 @@ class SCOPEOptimizer:
         self.max_rules_per_task = max_rules_per_task
         self.strategic_confidence_threshold = strategic_confidence_threshold
         self.store_history = store_history
-        self.allowed_domains = self.ALLOWED_DOMAINS
+        self.allowed_domains = custom_domains if custom_domains is not None else self.ALLOWED_DOMAINS
         self.synthesizer_model = synthesizer_model  # Store for classifier
+        self._custom_prompts = custom_prompts or {}
+
+        cp = self._custom_prompts
+        self._classification_prompt = cp.get("classification", CLASSIFICATION_PROMPT)
 
         # Map synthesis_mode to internal flag
         use_thoroughness = synthesis_mode.lower() == "thoroughness"
@@ -142,6 +157,7 @@ class SCOPEOptimizer:
             candidate_models=candidate_models,
             use_best_of_n=use_best_of_n,
             use_thoroughness_mode=use_thoroughness,
+            custom_prompts=cp,
         )
 
         # Initialize history store (only if store_history is enabled)
@@ -157,6 +173,7 @@ class SCOPEOptimizer:
             max_rules_per_domain=max_strategic_rules_per_domain,
             optimizer_model=optimizer_model,
             enable_rule_optimization=enable_rule_optimization,
+            custom_prompts=cp,
         )
 
         self._successful_steps_count = {}  # Track successful steps for quality analysis
@@ -257,8 +274,7 @@ class SCOPEOptimizer:
         else:
             all_rules_context += "No tactical rules yet.\n"
         
-        # Construct classification prompt using template from prompts.py
-        classification_prompt = CLASSIFICATION_PROMPT.format(
+        classification_prompt = self._classification_prompt.format(
             allowed_domains=", ".join(self.allowed_domains),
             update_text=update_text,
             rationale=rationale,

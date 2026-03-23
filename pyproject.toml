@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "scope-optimizer"
-version = "0.1.2"
+version = "0.1.3"
 description = "SCOPE: Self-evolving Context Optimization via Prompt Evolution - A framework for automatic prompt optimization"
 readme = "README.md"
 license = {text = "MIT"}

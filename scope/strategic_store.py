@@ -32,6 +32,7 @@ class StrategicMemoryStore:
         max_rules_per_domain: int = 10,
         optimizer_model = None,
         enable_rule_optimization: bool = True,
+        custom_prompts: dict = None,
     ):
         """
         Initialize the strategic memory store.
@@ -41,11 +42,13 @@ class StrategicMemoryStore:
             max_rules_per_domain: Maximum strategic rules per domain per agent
             optimizer_model: Model for rule optimization (optional)
             enable_rule_optimization: Whether to enable automatic optimization
+            custom_prompts: Optional dict of prompt overrides passed to MemoryOptimizer
         """
         self.exp_path = exp_path
         self.max_rules_per_domain = max_rules_per_domain
         self.optimizer_model = optimizer_model
         self.enable_rule_optimization = enable_rule_optimization
+        self._custom_prompts = custom_prompts or {}
 
         # Create strategic_memory directory
         self.strategic_dir = os.path.join(exp_path, "strategic_memory")
@@ -271,6 +274,7 @@ class StrategicMemoryStore:
             # Initialize orchestrator
             orchestrator = MemoryOptimizer(
                 model=self.optimizer_model,
+                custom_prompts=self._custom_prompts,
             )
 
             # Run optimization

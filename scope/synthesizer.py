@@ -50,9 +50,13 @@ class GuidelineSynthesizer:
     that has a generate() method compatible with the standard ChatMessage format.
     
     Prompts are imported from scope.prompts module for easy customization.
+    Custom prompts can be injected via the ``custom_prompts`` dict to override
+    any built-in template (keys: ``error_reflection``, ``quality_reflection_efficiency``,
+    ``quality_reflection_thoroughness``, ``selector``).
     """
 
-    def __init__(self, model, candidate_models=None, use_best_of_n=False, use_thoroughness_mode=True):
+    def __init__(self, model, candidate_models=None, use_best_of_n=False, use_thoroughness_mode=True,
+                 custom_prompts: Optional[Dict[str, str]] = None):
         """
         Initialize the guideline synthesizer.
         
@@ -62,11 +66,21 @@ class GuidelineSynthesizer:
             candidate_models: List of additional model instances for "best of N" approach
             use_best_of_n: Enable multi-model candidate generation with selection
             use_thoroughness_mode: Use thoroughness mode (comprehensive) vs efficiency mode (lightweight)
+            custom_prompts: Optional dict to override built-in prompt templates.
+                Supported keys: "error_reflection", "quality_reflection_efficiency",
+                "quality_reflection_thoroughness", "selector".
+                Templates must use the same format placeholders as the built-in prompts.
         """
         self.model = model
         self.candidate_models = candidate_models or []
         self.use_best_of_n = use_best_of_n
         self.use_thoroughness_mode = use_thoroughness_mode
+
+        cp = custom_prompts or {}
+        self._prompt_error = cp.get("error_reflection", ERROR_REFLECTION_PROMPT)
+        self._prompt_quality_eff = cp.get("quality_reflection_efficiency", QUALITY_REFLECTION_PROMPT_EFFICIENCY)
+        self._prompt_quality_thor = cp.get("quality_reflection_thoroughness", QUALITY_REFLECTION_PROMPT_THOROUGHNESS)
+        self._prompt_selector = cp.get("selector", SELECTOR_PROMPT)
     
     async def _generate_single_candidate(
         self,
@@ -211,7 +225,7 @@ class GuidelineSynthesizer:
                 candidates_text += f"Confidence: {candidate.confidence}\n"
             
             # Format the selector prompt
-            prompt = SELECTOR_PROMPT.format(
+            prompt = self._prompt_selector.format(
                 agent_name=agent_name,
                 agent_role=agent_role,
                 task=task,
@@ -296,7 +310,7 @@ class GuidelineSynthesizer:
                 rules_text = "(none)"
             
             # Format the reflection prompt (no truncation limits to preserve context)
-            prompt = ERROR_REFLECTION_PROMPT.format(
+            prompt = self._prompt_error.format(
                 agent_name=agent_name,
                 agent_role=agent_role,
                 task=task,  # No truncation
@@ -403,7 +417,7 @@ class GuidelineSynthesizer:
                 rules_text = "(none)"
             
             if self.use_thoroughness_mode:
-                prompt = QUALITY_REFLECTION_PROMPT_THOROUGHNESS.format(
+                prompt = self._prompt_quality_thor.format(
                     agent_name=agent_name,
                     agent_role=agent_role,
                     task=task,
@@ -412,7 +426,7 @@ class GuidelineSynthesizer:
                     applied_rules=rules_text,
                 )
             else:
-                prompt = QUALITY_REFLECTION_PROMPT_EFFICIENCY.format(
+                prompt = self._prompt_quality_eff.format(
                     agent_name=agent_name,
                     agent_role=agent_role,
                     task=task,

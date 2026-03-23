@@ -36,14 +36,16 @@ class RuleAnalyzer:
     Analyzes rules in a domain and identifies optimization opportunities.
     """
     
-    def __init__(self, model):
+    def __init__(self, model, prompt_template: str = None):
         """
         Initialize the analyzer.
         
         Args:
             model: LLM model for analysis
+            prompt_template: Optional custom prompt (defaults to RULE_ANALYSIS_PROMPT)
         """
         self.model = model
+        self._prompt = prompt_template or RULE_ANALYSIS_PROMPT
     
     async def analyze(self, rules_list: List[Dict[str, Any]]) -> Dict[str, List]:
         """
@@ -73,7 +75,7 @@ class RuleAnalyzer:
             rule_text = rule.get("rule", str(rule))
             rules_text += f"Rule {rule_id}: {rule_text}\n"
         
-        prompt = RULE_ANALYSIS_PROMPT.format(
+        prompt = self._prompt.format(
             num_rules=len(rules_list),
             rules_text=rules_text,
         )
@@ -149,8 +151,9 @@ class ConsolidationOptimizer:
     Merges similar rules into more comprehensive ones.
     """
     
-    def __init__(self, model):
+    def __init__(self, model, prompt_template: str = None):
         self.model = model
+        self._prompt = prompt_template or RULE_MERGE_PROMPT
     
     async def consolidate(
         self,
@@ -221,7 +224,7 @@ class ConsolidationOptimizer:
             rationale = rule.get("rationale", "")
             rules_text += f"\nRule {indices[i]}:\n  Text: {rule_text}\n  Rationale: {rationale}\n"
         
-        prompt = RULE_MERGE_PROMPT.format(rules_text=rules_text)
+        prompt = self._prompt.format(rules_text=rules_text)
 
         try:
             messages = [
@@ -290,8 +293,9 @@ class SubsumptionOptimizer:
     Removes redundant specific rules that are covered by general ones.
     """
     
-    def __init__(self, model):
+    def __init__(self, model, prompt_template: str = None):
         self.model = model
+        self._prompt = prompt_template or SUBSUMPTION_VERIFY_PROMPT
     
     async def prune_subsumed(
         self,
@@ -346,7 +350,7 @@ class SubsumptionOptimizer:
         general_rule = id_to_rule[general_id].get("rule", "")
         specific_rule = id_to_rule[specific_id].get("rule", "")
         
-        prompt = SUBSUMPTION_VERIFY_PROMPT.format(
+        prompt = self._prompt.format(
             general_rule=general_rule,
             specific_rule=specific_rule,
         )
@@ -404,8 +408,9 @@ class ConflictOptimizer:
     Detects and resolves conflicting rules.
     """
     
-    def __init__(self, model):
+    def __init__(self, model, prompt_template: str = None):
         self.model = model
+        self._prompt = prompt_template or CONFLICT_RESOLVE_PROMPT
     
     async def resolve_conflicts(
         self,
@@ -483,7 +488,7 @@ class ConflictOptimizer:
         rule2_text = rule2.get("rule", "")
         rule2_rationale = rule2.get("rationale", "")
         
-        prompt = CONFLICT_RESOLVE_PROMPT.format(
+        prompt = self._prompt.format(
             idx1=idx1,
             rule1_text=rule1_text,
             rule1_rationale=rule1_rationale,
@@ -561,18 +566,22 @@ class MemoryOptimizer:
     Coordinates the rule optimization pipeline.
     """
     
-    def __init__(self, model):
+    def __init__(self, model, custom_prompts: dict = None):
         """
         Initialize the orchestrator.
         
         Args:
             model: LLM model for optimization
+            custom_prompts: Optional dict to override built-in prompt templates.
+                Supported keys: "rule_analysis", "rule_merge",
+                "subsumption_verify", "conflict_resolve".
         """
         self.model = model
-        self.analyzer = RuleAnalyzer(model)
-        self.consolidation_optimizer = ConsolidationOptimizer(model)
-        self.subsumption_optimizer = SubsumptionOptimizer(model)
-        self.conflict_optimizer = ConflictOptimizer(model)
+        cp = custom_prompts or {}
+        self.analyzer = RuleAnalyzer(model, prompt_template=cp.get("rule_analysis"))
+        self.consolidation_optimizer = ConsolidationOptimizer(model, prompt_template=cp.get("rule_merge"))
+        self.subsumption_optimizer = SubsumptionOptimizer(model, prompt_template=cp.get("subsumption_verify"))
+        self.conflict_optimizer = ConflictOptimizer(model, prompt_template=cp.get("conflict_resolve"))
     
     async def optimize_rules(
         self,
