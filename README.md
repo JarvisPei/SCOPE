@@ -37,6 +37,8 @@
 
 - **[2026/03]** **v0.1.3** — Added `custom_prompts` and `custom_domains` API: override built-in prompt templates and domain categories to tailor SCOPE for any use case (e.g., personal assistant, coding agent) without modifying core code.
 - **[2026/03]** [EvolveClaw](https://github.com/JarvisPei/EvolveClaw) — Evolve [OpenClaw](https://github.com/openclaw/openclaw)'s system prompt using SCOPE. Zero-modification plugin integration that makes the agent improve the more you use it.
+- **[2026/02]** We support agent workflows like [EvoFabric](https://github.com/huawei-noah/noah-research/tree/master/EvoFabric) with SCOPE, start equipping your agent with SCOPE now!
+
 
 ## Overview
 
